@@ -1,0 +1,24 @@
+package rules;
+
+import CNTT.DTO.EmployeeDTO;
+
+// Luật 1: Thưởng cho nhân viên có kinh nghiệm
+rule "Thuong Kinh Nghiem Cao"
+when
+    // Nếu nhân viên có kinh nghiệm trên 5 năm
+    $e : EmployeeDTO(experience > 5) 
+then
+    // Tính thưởng 10% lương và xếp hạng Chuyên gia
+    $e.setBonus($e.getSalary() * 0.1);
+    $e.setRank("Chuyên gia");
+    System.out.println("Đã áp dụng luật: Thưởng kinh nghiệm cao cho " + $e.getName());
+end
+
+// Luật 2: Thưởng cho nhân viên mới nhưng lương thấp
+rule "Ho tro nhan vien moi"
+when
+    $e : EmployeeDTO(experience <= 5, salary < 10000000)
+then
+    $e.setBonus(500000);
+    $e.setRank("Tiềm năng");
+end
