@@ -13,6 +13,8 @@ public class EmployeeDTO {
     private double salary;
     private double bonus;
     private String rank;
+    private int absentDays; 
+    private double fine;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -26,4 +28,8 @@ public class EmployeeDTO {
     public void setBonus(double bonus) { this.bonus = bonus; }
     public String getRank() { return rank; }
     public void setRank(String rank) { this.rank = rank; }
+    public int getAbsentDays() { return absentDays; }
+    public void setAbsentDays(int absentDays) { this.absentDays = absentDays; }
+    public double getFine() { return fine; }
+    public void setFine(double fine) { this.fine = fine;  }
 }

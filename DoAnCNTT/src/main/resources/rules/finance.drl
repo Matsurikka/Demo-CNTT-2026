@@ -1,0 +1,10 @@
+package rules;\n" +
+                "import CNTT.DTO.FinanceDTO;\n\n" +
+                "rule \"Auto Approve Revenue\"\nwhen\n  $f : FinanceDTO(type == \"THU\")\nthen\n" +
+                "  $f.setStatus(\"HOÀN THÀNH\");\n  $f.setNote(\"Thu tiền - Duyệt tự động.\");\nend\n\n" +
+                "rule \"Critical Expense\"\nwhen\n  $f : FinanceDTO(type == \"CHI\", amount >= 50000000)\nthen\n" +
+                "  $f.setStatus(\"KHẨN CẤP\");\n  $f.setNote(\"Cần CEO phê duyệt trực tiếp.\");\nend\n\n" +
+                "rule \"Quick Approve Ops\"\nwhen\n" +
+                "  $f : FinanceDTO(type == \"CHI\", amount < 5000000, \n" +
+                "                description matches \".*(điện|nước|văn phòng).*\")\nthen\n" +
+                "  $f.setStatus(\"ĐÃ DUYỆT\");\n  $f.setNote(\"Phí vận hành định kỳ.\");\nend

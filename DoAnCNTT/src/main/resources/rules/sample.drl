@@ -1,24 +1,73 @@
 package rules;
-
 import CNTT.DTO.EmployeeDTO;
 
-// Luật 1: Thưởng cho nhân viên có kinh nghiệm
-rule "Thuong Kinh Nghiem Cao"
+// 1. LUẬT TÍNH PHẠT LŨY TIẾN (Progressive Fine)
+rule "Calculate Progressive Fine"
+    salience 100 // Ưu tiên chạy trước để có con số phạt
 when
-    // Nếu nhân viên có kinh nghiệm trên 5 năm
-    $e : EmployeeDTO(experience > 5) 
+    $e : EmployeeDTO(absentDays > 3)
 then
-    // Tính thưởng 10% lương và xếp hạng Chuyên gia
-    $e.setBonus($e.getSalary() * 0.1);
-    $e.setRank("Chuyên gia");
-    System.out.println("Đã áp dụng luật: Thưởng kinh nghiệm cao cho " + $e.getName());
+    double totalFine = 0;
+    int excessiveDays = $e.getAbsentDays() - 3;
+    
+    if (excessiveDays <= 2) {
+        totalFine = excessiveDays * 100000; // Ngày 4, 5: 100k/ngày
+    } else {
+        totalFine = (2 * 100000) + ((excessiveDays - 2) * 200000); // Từ ngày 6: 200k/ngày
+    }
+    $e.setFine(totalFine);
 end
 
-// Luật 2: Thưởng cho nhân viên mới nhưng lương thấp
-rule "Ho tro nhan vien moi"
+// 2. LUẬT XẾP HẠNG PHỨC HỢP (Complex Ranking)
+rule "Rank - Expert"
+    salience 80
 when
-    $e : EmployeeDTO(experience <= 5, salary < 10000000)
+    $e : EmployeeDTO(experience >= 8, absentDays <= 2)
 then
-    $e.setBonus(500000);
-    $e.setRank("Tiềm năng");
+    $e.setRank("Chuyên gia cao cấp");
+end
+
+rule "Rank - Senior"
+    salience 80
+when
+    $e : EmployeeDTO(experience >= 4 && experience < 8, absentDays <= 4)
+then
+    $e.setRank("Nhân viên cấp cao");
+end
+
+rule "Rank - Disciplined"
+    salience 90 // Ưu tiên cao để ghi đè các hạng khác nếu vi phạm nặng
+when
+    $e : EmployeeDTO(absentDays > 7)
+then
+    $e.setRank("Vi phạm kỷ luật");
+end
+
+// 3. LUẬT THƯỞNG DỰA TRÊN THỨ BẬC VÀ CHUYÊN CẦN
+rule "Bonus - Loyalty & Performance"
+    salience 50
+when
+    // Chỉ thưởng cho người có hạng cao VÀ không vắng ngày nào
+    $e : EmployeeDTO(rank == "Chuyên gia cao cấp", absentDays == 0)
+then
+    double extraBonus = $e.getSalary() * 0.3 + 2000000; // Thưởng 30% + 2 triệu chuyên cần
+    $e.setBonus(extraBonus);
+end
+
+rule "Bonus - Standard"
+    salience 50
+when
+    $e : EmployeeDTO(rank == "Nhân viên cấp cao")
+then
+    $e.setBonus($e.getSalary() * 0.15);
+end
+
+// 4. LUẬT CÂN BẰNG TÀI CHÍNH (Final Calculation)
+rule "Final Net Income Adjustment"
+    salience 10 // Chạy cuối cùng
+when
+    $e : EmployeeDTO(fine > bonus)
+then
+    // Nếu tiền phạt > tiền thưởng, có thể thêm logic thông báo hoặc trừ thẳng vào lương
+    System.out.println("Cảnh báo: Nhân viên " + $e.getName() + " có tiền phạt cao hơn tiền thưởng!");
 end
